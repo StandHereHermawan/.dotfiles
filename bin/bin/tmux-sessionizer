@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+session=$(find /home ~ ~/Project-Belajar-In-Linux/Project ~/Project-Belajar-In-Linux/Tools-For-Developing ~/Project-Belajar-In-Linux/Project/php ~/Project-Belajar-In-Linux/ ~/.config ~/Videos ~/Downloads -mindepth 1 -maxdepth 1 -type d,l | fzf)
+# /home/arief-karditya/Project-Belajar-In-Linux/Project
+# /home/arief-karditya/Project-Belajar-In-Linux/Tools-For-Developing
+
+if [ -z "$session" ]; then
+	exit 1	
+fi
+
+session_name=$(basename "$session" | tr . _)
+
+if [ -z "$TMUX" ]; then
+	if ! tmux has-session -t "$session_name" 2> /dev/null; then
+		tmux new-session -s "$session_name" -c "$session"
+		exit
+	else
+		tmux a -t "$session_name"
+		exit
+	fi
+fi
+
+if ! tmux has-session -t "$session_name" 2> /dev/null && [ -n "$TMUX" ]; then
+	tmux new-session -s "$session_name" -c "$session" -d
+fi
+
+tmux switch-client -t "$session_name"
